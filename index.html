@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>SHREENK.APP</title>
+    
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 fill=%22black%22/><text y=%22.9em%22 font-size=%2280%22 fill=%22white%22 font-family=%22monospace%22>S</text></svg>">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 fill=%22black%22/><circle cx=%2250%22 cy=%2250%22 r=%2220%22 fill=%22white%22/></svg>">
+
+    <style>
+        :root {
+            --bg: #000000;
+            --surface: #111111;
+            --border: #222222;
+            --text: #ffffff;
+            --font: 'JetBrains Mono', 'Courier New', monospace;
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: var(--font);
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .header {
+            padding: 20px;
+            font-size: 11px;
+            letter-spacing: 2px;
+            color: #555;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+        }
+
+        textarea {
+            flex-grow: 1;
+            background: var(--bg);
+            border: none;
+            color: var(--text);
+            padding: 30px;
+            font-size: 15px;
+            line-height: 1.6;
+            outline: none;
+            resize: none;
+            font-family: var(--font);
+        }
+
+        .toolbar {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            border-top: 1px solid var(--border);
+            background: var(--bg);
+        }
+
+        button {
+            background: var(--bg);
+            color: var(--text);
+            border: none;
+            padding: 25px 10px;
+            font-family: var(--font);
+            font-size: 11px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        button:active {
+            background: var(--text);
+            color: var(--bg);
+        }
+
+        button.main {
+            border-right: 1px solid var(--border);
+            font-weight: bold;
+        }
+
+        .stats {
+            padding: 10px 20px;
+            font-size: 9px;
+            color: #333;
+            text-align: right;
+            background: var(--bg);
+            border-top: 1px solid #0a0a0a;
+        }
+
+        /* Mode "Copié" visuel */
+        .flash { color: #00ff88 !important; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <span>SHREENK.APP // V1.0</span>
+        <span id="status">READY</span>
+    </div>
+
+    <textarea id="editor" placeholder="PASTE_LONG_INPUT_HERE..."></textarea>
+
+    <div class="toolbar">
+        <button class="main" onclick="processShreenk()">Process_Shreenk</button>
+        <button onclick="processSnapshot()">Gen_Snapshot</button>
+    </div>
+
+    <div class="stats" id="info">TOKENS_SAVED: 0 // CHARS: 0</div>
+
+    <script>
+        const editor = document.getElementById('editor');
+        const status = document.getElementById('status');
+        const info = document.getElementById('info');
+
+        function processShreenk() {
+            let raw = editor.value;
+            if(!raw) return;
+
+            const initialLen = raw.length;
+
+            // Logic: Remove fluff, politeness, and excessive spacing
+            let clean = raw.replace(/(please|could you|thanks|hello|hi|help me|i need to|s'il vous plaît|merci|est-ce que|pourriez vous)/gi, '');
+            clean = clean.replace(/\n\s*\n/g, '\n'); // Remove double line breaks
+            
+            const final = `[task]\n${clean.trim()}\n[format:dense]`;
+            
+            editor.value = final;
+            copyToClipboard(final);
+            
+            const saved = Math.max(0, Math.ceil((initialLen - final.length) / 4));
+            updateUI("SHREENKED", saved, final.length);
+        }
+
+        function processSnapshot() {
+            const snapCmd = "action: context_dump\nmode: session_migration\ntarget: core_logic_only";
+            editor.value = snapCmd;
+            copyToClipboard(snapCmd);
+            updateUI("SNAPSHOT_READY", 0, snapCmd.length);
+        }
+
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text);
+        }
+
+        function updateUI(msg, saved, chars) {
+            status.innerText = msg + "_AND_COPIED";
+            status.classList.add('flash');
+            info.innerText = `TOKENS_SAVED: ${saved} // CHARS: ${chars}`;
+            
+            setTimeout(() => {
+                status.innerText = "READY";
+                status.classList.remove('flash');
+            }, 2500);
+        }
+
+        // Auto-focus on start
+        window.onload = () => editor.focus();
+    </script>
+</body>
+</html>
