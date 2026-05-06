@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SHREENK | Économisez sur vos Tokens IA</title>
+    <style>
+        :root {
+            --bg: #000000;
+            --card: #111111;
+            --accent: #007AFF; /* Bleu Apple pour la confiance */
+            --green: #34C759;
+            --text: #ffffff;
+            --text-secondary: #888888;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .app-shell {
+            width: 100%;
+            max-width: 900px;
+            height: 90vh;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            font-size: 42px;
+            font-weight: 800;
+            margin: 0;
+            letter-spacing: -1px;
+        }
+
+        .tagline {
+            color: var(--text-secondary);
+            font-size: 16px;
+            margin-top: 10px;
+        }
+
+        .main-card {
+            background: var(--card);
+            border-radius: 24px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            border: 1px solid #222;
+            overflow: hidden;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+        }
+
+        textarea {
+            flex-grow: 1;
+            background: transparent;
+            border: none;
+            color: white;
+            padding: 30px;
+            font-size: 18px;
+            resize: none;
+            outline: none;
+            line-height: 1.6;
+        }
+
+        .stats-bar {
+            background: rgba(255,255,255,0.03);
+            padding: 20px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid #222;
+        }
+
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            margin-bottom: 4px;
+        }
+
+        .stat-value {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--green);
+        }
+
+        .controls {
+            padding: 20px 30px;
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 15px;
+            background: var(--card);
+        }
+
+        button {
+            border-radius: 14px;
+            padding: 18px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: 0.2s;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #222;
+            color: white;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            filter: brightness(1.2);
+        }
+
+        .badge {
+            background: #1a1a1a;
+            padding: 4px 12px;
+            border-radius: 100px;
+            font-size: 12px;
+            color: var(--accent);
+            border: 1px solid var(--accent);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-shell">
+        <header>
+            <div style="margin-bottom: 15px;"><span class="badge">Économiseur de Tokens IA</span></div>
+            <h1>SHREENK</h1>
+            <p class="tagline">Réduisez vos coûts Claude et ChatGPT jusqu'à 40%</p>
+        </header>
+
+        <div class="main-card">
+            <textarea id="editor" placeholder="Collez votre prompt ici (même s'il est très long)..."></textarea>
+            
+            <div class="stats-bar">
+                <div class="stat-item">
+                    <span class="stat-label">Argent Économisé</span>
+                    <span class="stat-value" id="money">0.00 €</span>
+                </div>
+                <div class="stat-item" style="text-align: right;">
+                    <span class="stat-label">Tokens Retirés</span>
+                    <span class="stat-value" id="tokens" style="color: white;">0</span>
+                </div>
+            </div>
+
+            <div class="controls">
+                <button class="btn-primary" onclick="shreenk()">Compresser le Prompt</button>
+                <button class="btn-secondary" onclick="snapshot()">Snapshot</button>
+            </div>
+        </div>
+        
+        <p style="text-align: center; font-size: 12px; color: #444; margin-top: 20px;">
+            Confidentialité totale : Vos données ne quittent jamais votre navigateur.
+        </p>
+    </div>
+
+    <script>
+        const editor = document.getElementById('editor');
+        const money = document.getElementById('money');
+        const tokens = document.getElementById('tokens');
+
+        function shreenk() {
+            const raw = editor.value;
+            if(!raw) return;
+            const oldLen = raw.length;
+
+            // Algorithme de nettoyage
+            let clean = raw.replace(/(bonjour|salut|hello|merci|svp|s'il vous plaît|pourriez-vous|est-ce que)/gi, '');
+            clean = clean.replace(/\n\s*\n/g, '\n').trim();
+            const result = `[TASK]\n${clean}\n[MODE:DENSE]`;
+            
+            editor.value = result;
+            navigator.clipboard.writeText(result);
+
+            // Calcul financier (moyenne prix Opus/Sonnet)
+            const tokenCount = Math.max(0, Math.ceil((oldLen - result.length) / 4));
+            const savings = (tokenCount * 0.00003).toFixed(4); // Estimation en Euros
+
+            tokens.innerText = tokenCount;
+            money.innerText = savings + " €";
+            
+            const btn = document.querySelector('.btn-primary');
+            btn.innerText = "Copié dans le presse-papier !";
+            setTimeout(() => btn.innerText = "Compresser le Prompt", 2500);
+        }
+
+        function snapshot() {
+            const snap = "[ACTION: CONTEXT_DUMP]\n[MODE: MIGRATION]";
+            editor.value = snap;
+            navigator.clipboard.writeText(snap);
+        }
+    </script>
+    <footer style="margin-top: 30px; display: flex; justify-content: space-between; font-size: 10px; color: #444; border-top: 1px solid #111; padding-top: 20px;">
+    <div>
+        <a href="#" style="color: #444; text-decoration: none; margin-right: 15px;">Tarifs</a>
+        <a href="#" style="color: #444; text-decoration: none; margin-right: 15px;">Confidentialité</a>
+        <a href="#" style="color: #444; text-decoration: none;">Mentions Légales</a>
+    </div>
+    <div>© 2026 SHREENK.APP - Une création Elodie Weber</div>
+</footer>
+</body>
+</html>
