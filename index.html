@@ -13,10 +13,12 @@
     <style>
         :root {
             --bg: #000000;
-            --surface: #111111;
-            --border: #222222;
+            --surface: #0a0a0a;
+            --border: #1a1a1a;
             --text: #ffffff;
-            --font: 'JetBrains Mono', 'Courier New', monospace;
+            --subtext: #444444;
+            --accent: #00ff88;
+            --font: 'JetBrains Mono', 'Roboto Mono', 'Courier New', monospace;
         }
 
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -32,30 +34,41 @@
             overflow: hidden;
         }
 
-        .header {
-            padding: 20px;
-            font-size: 11px;
+        /* HEADER */
+        .nav {
+            padding: 15px 25px;
+            font-size: 10px;
             letter-spacing: 2px;
-            color: #555;
+            color: var(--subtext);
             border-bottom: 1px solid var(--border);
             display: flex;
             justify-content: space-between;
+            align-items: center;
         }
 
+        .ghost-indicator {
+            font-size: 8px;
+            border: 1px solid var(--subtext);
+            padding: 2px 6px;
+            border-radius: 2px;
+        }
+
+        /* MAIN EDITOR */
         textarea {
             flex-grow: 1;
             background: var(--bg);
             border: none;
             color: var(--text);
             padding: 30px;
-            font-size: 15px;
-            line-height: 1.6;
+            font-size: 16px;
+            line-height: 1.5;
             outline: none;
             resize: none;
             font-family: var(--font);
         }
 
-        .toolbar {
+        /* TOOLBAR & BUTTONS */
+        .footer {
             display: grid;
             grid-template-columns: 1fr 1fr;
             border-top: 1px solid var(--border);
@@ -68,11 +81,12 @@
             border: none;
             padding: 25px 10px;
             font-family: var(--font);
-            font-size: 11px;
-            letter-spacing: 1px;
+            font-size: 12px;
+            font-weight: bold;
+            letter-spacing: 2px;
             text-transform: uppercase;
             cursor: pointer;
-            transition: all 0.15s ease;
+            transition: all 0.1s ease;
         }
 
         button:active {
@@ -80,88 +94,101 @@
             color: var(--bg);
         }
 
-        button.main {
+        button.primary {
             border-right: 1px solid var(--border);
-            font-weight: bold;
+            background: #ffffff;
+            color: #000000;
         }
 
-        .stats {
-            padding: 10px 20px;
+        /* METRICS BAR */
+        .metrics {
+            padding: 12px 25px;
             font-size: 9px;
-            color: #333;
-            text-align: right;
-            background: var(--bg);
+            color: var(--subtext);
+            display: flex;
+            justify-content: space-between;
+            background: #050505;
             border-top: 1px solid #0a0a0a;
+            text-transform: uppercase;
         }
 
-        /* Mode "Copié" visuel */
-        .flash { color: #00ff88 !important; }
+        .flash-active { color: var(--accent) !important; font-weight: bold; }
     </style>
 </head>
 <body>
 
-    <div class="header">
-        <span>SHREENK.APP // V1.0</span>
-        <span id="status">READY</span>
+    <div class="nav">
+        <span>SHREENK.APP // CORE_V1.1</span>
+        <span class="ghost-indicator">GHOST_MODE: ACTIVE (100% LOCAL)</span>
     </div>
 
-    <textarea id="editor" placeholder="PASTE_LONG_INPUT_HERE..."></textarea>
+    <textarea id="io" placeholder="INPUT_RAW_DATA_OR_THOUGHTS..."></textarea>
 
-    <div class="toolbar">
-        <button class="main" onclick="processShreenk()">Process_Shreenk</button>
-        <button onclick="processSnapshot()">Gen_Snapshot</button>
+    <div class="footer">
+        <button class="primary" onclick="runShreenk()">SHREENK_NOW</button>
+        <button onclick="runSnapshot()">GEN_SNAPSHOT</button>
     </div>
 
-    <div class="stats" id="info">TOKENS_SAVED: 0 // CHARS: 0</div>
+    <div class="metrics">
+        <span id="st">STATUS: STANDBY</span>
+        <span id="mt">TOKENS_SAVED: 0 // CHARS: 0</span>
+    </div>
 
     <script>
-        const editor = document.getElementById('editor');
-        const status = document.getElementById('status');
-        const info = document.getElementById('info');
+        const io = document.getElementById('io');
+        const st = document.getElementById('st');
+        const mt = document.getElementById('mt');
 
-        function processShreenk() {
-            let raw = editor.value;
+        function runShreenk() {
+            const raw = io.value;
             if(!raw) return;
 
-            const initialLen = raw.length;
+            const oldLen = raw.length;
 
-            // Logic: Remove fluff, politeness, and excessive spacing
-            let clean = raw.replace(/(please|could you|thanks|hello|hi|help me|i need to|s'il vous plaît|merci|est-ce que|pourriez vous)/gi, '');
-            clean = clean.replace(/\n\s*\n/g, '\n'); // Remove double line breaks
+            // 1. ADVANCED NOISE REMOVAL (Week 2 logic)
+            let clean = raw.replace(/(hello|hi|hey|greetings|please|could you|would you mind|thanks|thank you|merci|svp|est-ce que|pourriez vous|i would like to|help me to|i need to)/gi, '');
             
-            const final = `[task]\n${clean.trim()}\n[format:dense]`;
+            // 2. WHITESPACE DISTILLATION
+            clean = clean.replace(/\n\s*\n/g, '\n'); 
+            clean = clean.replace(/[ \t]+/g, ' ');
+
+            // 3. STRUCTURE WRAPPING
+            const output = `[task]\n${clean.trim()}\n[format:dense]`;
             
-            editor.value = final;
-            copyToClipboard(final);
+            io.value = output;
+            copy(output);
+
+            // 4. METRICS CALCULATION (Fixed)
+            const newLen = output.length;
+            const saved = Math.max(0, Math.ceil((oldLen - newLen) / 4));
             
-            const saved = Math.max(0, Math.ceil((initialLen - final.length) / 4));
-            updateUI("SHREENKED", saved, final.length);
+            updateMetrics("SHREENKED", saved, newLen);
         }
 
-        function processSnapshot() {
-            const snapCmd = "action: context_dump\nmode: session_migration\ntarget: core_logic_only";
-            editor.value = snapCmd;
-            copyToClipboard(snapCmd);
-            updateUI("SNAPSHOT_READY", 0, snapCmd.length);
+        function runSnapshot() {
+            const snap = "action: context_dump\nmode: migration\ntarget: core_logic_only\nno_filler: true";
+            io.value = snap;
+            copy(snap);
+            updateMetrics("SNAPSHOT", 0, snap.length);
         }
 
-        function copyToClipboard(text) {
+        function copy(text) {
             navigator.clipboard.writeText(text);
         }
 
-        function updateUI(msg, saved, chars) {
-            status.innerText = msg + "_AND_COPIED";
-            status.classList.add('flash');
-            info.innerText = `TOKENS_SAVED: ${saved} // CHARS: ${chars}`;
+        function updateMetrics(status, saved, length) {
+            st.innerText = `STATUS: ${status}_AND_COPIED`;
+            st.classList.add('flash-active');
+            mt.innerText = `TOKENS_SAVED: ${saved} // CHARS: ${length}`;
             
             setTimeout(() => {
-                status.innerText = "READY";
-                status.classList.remove('flash');
-            }, 2500);
+                st.innerText = "STATUS: STANDBY";
+                st.classList.remove('flash-active');
+            }, 3000);
         }
 
-        // Auto-focus on start
-        window.onload = () => editor.focus();
+        // Focus editor automatically
+        window.onload = () => io.focus();
     </script>
 </body>
 </html>
