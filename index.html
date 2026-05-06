@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SHREENK | Money Maker</title>
+    <style>
+        :root { --bg: #08080A; --card: #121217; --accent: #5D5FEF; --text: #FFFFFF; --dim: #63636E; --green: #4ADE80; }
+        body { background: var(--bg); color: var(--text); font-family: sans-serif; margin: 0; display: flex; justify-content: center; padding: 40px 20px; }
+        .container { width: 100%; max-width: 800px; display: flex; flex-direction: column; gap: 20px; }
+        .panel { background: var(--card); border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; overflow: hidden; display: flex; flex-direction: column; }
+        textarea { width: 100%; height: 300px; background: transparent; border: none; color: white; padding: 30px; font-size: 18px; outline: none; resize: none; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .stats { display: grid; grid-template-columns: 1fr 1fr; padding: 20px 30px; background: rgba(255,255,255,0.02); }
+        .stat-box { display: flex; flex-direction: column; }
+        .label { font-size: 10px; color: var(--dim); text-transform: uppercase; margin-bottom: 5px; }
+        .val { font-size: 24px; font-weight: bold; }
+        .money { color: var(--green); }
+        .btns { padding: 20px 30px; display: flex; gap: 10px; }
+        button { flex: 1; padding: 20px; border-radius: 12px; border: none; font-weight: bold; cursor: pointer; transition: 0.3s; font-size: 16px; }
+        #btn-go { background: var(--accent); color: white; }
+        #btn-snap { background: #222; color: white; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header style="text-align:center; margin-bottom:20px;">
+        <h1 style="margin:0; letter-spacing:-1px;">SHREENK</h1>
+        <p style="color:#444; font-size:14px;">Distillateur de tokens pour Elodie</p>
+    </header>
+
+    <div class="panel">
+        <textarea id="main-input" placeholder="Collez un texte long avec 'Bonjour', 'Merci', etc..."></textarea>
+        
+        <div class="stats">
+            <div class="stat-box">
+                <span class="label">Économie (€)</span>
+                <span class="val money" id="display-money">0.000 €</span>
+            </div>
+            <div class="stat-box" style="text-align:right;">
+                <span class="label">Tokens supprimés</span>
+                <span class="val" id="display-tokens">0</span>
+            </div>
+        </div>
+
+        <div class="btns">
+            <button id="btn-go" onclick="shreenkIt()">SHREENK NOW</button>
+            <button id="btn-snap" onclick="snapIt()">SNAPSHOT</button>
+        </div>
+    </div>
+</div>
+
+<script>
+function shreenkIt() {
+    const input = document.getElementById('main-input');
+    const moneyDisp = document.getElementById('display-money');
+    const tokenDisp = document.getElementById('display-tokens');
+    const btn = document.getElementById('btn-go');
+
+    const textBefore = input.value;
+    if (!textBefore) return;
+
+    // 1. On stocke la longueur de base
+    const lenBefore = textBefore.length;
+
+    // 2. On compresse (Logique de nettoyage)
+    let textAfter = textBefore.replace(/(bonjour|salut|hello|merci|svp|s'il vous plaît|pourriez-vous|est-ce que|thanks|please)/gi, '');
+    textAfter = textAfter.replace(/\n\s*\n/g, '\n').trim();
+    
+    const finalResult = "[TASK]\n" + textAfter + "\n[MODE:DENSE]";
+    input.value = finalResult;
+
+    // 3. On calcule la différence
+    const lenAfter = finalResult.length;
+    const diff = lenBefore - lenAfter;
+    
+    // Si la différence est positive, on calcule les tokens (4 chars = 1 token)
+    const tokens = diff > 0 ? Math.ceil(diff / 4) : 0;
+    const cash = (tokens * 0.00003).toFixed(4);
+
+    // 4. On met à jour l'affichage
+    tokenDisp.innerText = tokens;
+    moneyDisp.innerText = cash + " €";
+
+    // 5. Copie et Feedback visuel
+    navigator.clipboard.writeText(finalResult);
+    btn.innerText = "COPIÉ !";
+    btn.style.backgroundColor = "#4ADE80";
+    btn.style.color = "#000";
+
+    setTimeout(() => {
+        btn.innerText = "SHREENK NOW";
+        btn.style.backgroundColor = "#5D5FEF";
+        btn.style.color = "#fff";
+    }, 2000);
+}
+
+function snapIt() {
+    const input = document.getElementById('main-input');
+    input.value = "[ACTION: CONTEXT_DUMP]\n[MODE: MIGRATION]";
+}
+</script>
+
+</body>
+</html>
