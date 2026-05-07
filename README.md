@@ -1,8 +1,8 @@
 - 👋 Hi, I’m @ElleWeber
-- 👀 I’m interested in programming and data science
+- 👀 I’m interested in legal tech / compliance
 - 🌱 I’m currently learning python and MySQL
 - 💞️ I’m looking to collaborate on projects
-- 📫 How to reach me elodieweber@elodieweber.consulting
+- 📫 How to reach me agencenoho@gmail.com
 - 😄 Pronouns: She
 - ⚡ Fun fact: I have AUDHD
 
